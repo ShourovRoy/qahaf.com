@@ -104,3 +104,7 @@ Orders already record `paymentMethod` and `paymentStatus`, and every money movem
 1. Create the order and a `pending` transaction.
 2. Redirect the customer to the gateway.
 3. Mark the transaction `succeeded` or `failed` from the gateway's IPN/validation callback.
+
+## Credits
+
+Designed and built by [Roybrains](https://roybrains.com).

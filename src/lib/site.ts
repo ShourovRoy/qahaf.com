@@ -6,6 +6,7 @@ export const site = {
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   locale: "en_BD",
   currency: "BDT",
+  developer: { name: "Roybrains", url: "https://roybrains.com" },
   nav: [
     { label: "New", href: "/shop?sort=newest" },
     { label: "Shop", href: "/shop" },

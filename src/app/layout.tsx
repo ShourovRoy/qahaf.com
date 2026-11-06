@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Jost } from "next/font/google";
+import { DeveloperSignature } from "@/components/developer-signature";
 import { Toaster } from "@/components/toaster";
 import { site } from "@/lib/site";
 import "./globals.css";
@@ -22,6 +23,8 @@ export const metadata: Metadata = {
   title: { default: `${site.name} — Menswear in Bangladesh`, template: `%s | ${site.name}` },
   description: site.description,
   applicationName: site.name,
+  authors: [{ name: site.developer.name, url: site.developer.url }],
+  creator: site.developer.name,
   keywords: ["menswear Bangladesh", "men's clothing", "shirts", "panjabi", "trousers", "QAHAF", "online shopping BD"],
   openGraph: {
     type: "website",
@@ -49,6 +52,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col">
         {children}
         <Toaster />
+        <DeveloperSignature />
       </body>
     </html>
   );

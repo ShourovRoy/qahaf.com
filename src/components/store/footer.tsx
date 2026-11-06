@@ -1,4 +1,6 @@
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
+import { site } from "@/lib/site";
 import { getNavCategories } from "@/server/catalog";
 import { getSettings } from "@/server/settings";
 
@@ -47,7 +49,21 @@ export async function Footer() {
             </ul>
           )}
         </div>
-        <p className="col-span-full border-t border-espresso/20 pt-6 text-xs">© QAHAF. All rights reserved.</p>
+        <div className="col-span-full flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-espresso/20 pt-6 text-xs">
+          <p>© QAHAF. All rights reserved.</p>
+          <a
+            href={site.developer.url}
+            target="_blank"
+            rel="noopener"
+            className="group inline-flex items-center gap-1 text-espresso/80 transition-colors hover:text-espresso"
+          >
+            Crafted by
+            <span className="font-serif text-sm italic tracking-wide text-espresso underline decoration-espresso/30 underline-offset-4 transition-colors group-hover:decoration-espresso">
+              {site.developer.name}
+            </span>
+            <ArrowUpRight size={12} strokeWidth={1.5} aria-hidden className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </a>
+        </div>
       </div>
     </footer>
   );

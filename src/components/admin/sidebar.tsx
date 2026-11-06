@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/cn";
+import { site } from "@/lib/site";
 
 type Counts = { pendingOrders: number; lowStock: number } | null;
 
@@ -50,6 +51,9 @@ export function AdminSidebar({ counts }: { counts: Counts }) {
       <Link href="/" className="mt-6 flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm text-ivory/70 hover:text-ivory">
         <Store size={17} strokeWidth={1.5} /> View store
       </Link>
+      <a href={site.developer.url} target="_blank" rel="noopener" className="mt-4 px-3 text-[11px] text-ivory/60 hover:text-ivory">
+        Built and supported by <span className="font-serif text-xs italic text-tan">{site.developer.name}</span>
+      </a>
     </nav>
   );
 
