@@ -6,6 +6,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ORDER_LABEL, OrderProgress, OrderStatusBadge, PaymentStatusBadge, PROVIDER_LABEL } from "@/components/order-status";
+import { BkashResubmit } from "@/components/store/bkash-resubmit";
 import { CancelOrderButton } from "@/components/store/cancel-order-button";
 import { Skeleton } from "@/components/ui/misc";
 import { db } from "@/db";
@@ -34,13 +35,15 @@ async function OrderDetail({ params, searchParams }: PageProps<"/account/orders/
     where: and(eq(order.id, id), eq(order.userId, user.id)),
     with: {
       items: { with: { review: { columns: { id: true } } } },
-      events: { orderBy: asc(orderEvent.createdAt), columns: { id: true, toStatus: true, note: true, createdAt: true } },
+      events: { orderBy: asc(orderEvent.createdAt), columns: { id: true, fromStatus: true, toStatus: true, note: true, createdAt: true } },
       transactions: true,
     },
   });
   if (!o) notFound();
 
   const canReview = o.status === "delivered" || o.status === "cancelled";
+  const bkash = o.paymentMethod === "bkash" ? o.transactions.filter((t) => t.provider === "bkash" && t.type === "charge") : [];
+  const lastBkash = bkash.toSorted((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
 
   return (
     <div className="space-y-8">
@@ -49,7 +52,11 @@ async function OrderDetail({ params, searchParams }: PageProps<"/account/orders/
           <CheckCircle2 className="mt-0.5 shrink-0 text-success" size={20} />
           <div>
             <p className="font-medium">Thank you! Your order has been placed.</p>
-            <p className="text-sm text-chocolate">We&apos;ve emailed a confirmation. Our team will verify your order shortly, usually by phone.</p>
+            <p className="text-sm text-chocolate">
+              {o.paymentMethod === "bkash"
+                ? "We've emailed a confirmation. We'll check your bKash payment and confirm your order shortly."
+                : "We've emailed a confirmation. Our team will verify your order shortly, usually by phone."}
+            </p>
           </div>
         </div>
       )}
@@ -105,7 +112,7 @@ async function OrderDetail({ params, searchParams }: PageProps<"/account/orders/
             {o.events.map((e) => (
               <li key={e.id} className="relative">
                 <span className="absolute -left-[25px] top-1.5 h-2 w-2 rounded-full bg-espresso" />
-                <p className="text-sm font-medium">{ORDER_LABEL[e.toStatus]}</p>
+                <p className="text-sm font-medium">{e.fromStatus === e.toStatus ? "Payment update" : ORDER_LABEL[e.toStatus]}</p>
                 <p className="text-xs text-chocolate">{formatDateTime(e.createdAt)}{e.note && ` · ${e.note}`}</p>
               </li>
             ))}
@@ -125,7 +132,23 @@ async function OrderDetail({ params, searchParams }: PageProps<"/account/orders/
           <div className="rounded-sm bg-surface p-5 text-sm">
             <h2 className="eyebrow mb-3">Payment</h2>
             <p>{PROVIDER_LABEL[o.paymentMethod]}</p>
+            {lastBkash?.providerTransactionId && (
+              <p className="mt-1 text-xs text-chocolate">
+                TrxID <span className="font-mono tracking-wider text-espresso">{lastBkash.providerTransactionId}</span>
+              </p>
+            )}
             <div className="mt-2"><PaymentStatusBadge status={o.paymentStatus} /></div>
+            {o.paymentMethod === "bkash" && o.paymentStatus === "pending" && (
+              <p className="mt-2 text-xs text-chocolate">We&apos;re checking your bKash payment.</p>
+            )}
+            {o.paymentMethod === "bkash" && o.paymentStatus === "failed" && (
+              <>
+                <p className="mt-2 text-xs text-danger">
+                  We couldn&apos;t find this payment{lastBkash?.failureReason ? `: ${lastBkash.failureReason}` : "."}
+                </p>
+                {o.status === "pending" && <BkashResubmit orderId={o.id} defaultSender={user.phone ?? ""} />}
+              </>
+            )}
           </div>
           <div className="rounded-sm bg-surface p-5 text-sm">
             <h2 className="eyebrow mb-3">Deliver to</h2>

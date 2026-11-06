@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { BkashPayment } from "@/components/admin/bkash-payment";
 import { OrderActions } from "@/components/admin/order-actions";
 import { ORDER_LABEL, OrderStatusBadge, PaymentStatusBadge, PROVIDER_LABEL, TxnStatusBadge } from "@/components/order-status";
 import { Skeleton } from "@/components/ui/misc";
@@ -42,6 +43,21 @@ async function Detail({ params }: PageProps<"/admin/orders/[id]">) {
   if (!o) notFound();
 
   const customerOrders = await db.$count(order, eq(order.userId, o.userId));
+  const bkashCharges = o.transactions
+    .filter((t) => t.provider === "bkash" && t.type === "charge")
+    .map((t) => {
+      const payload = (t.providerPayload ?? {}) as { senderNumber?: string; receiverNumber?: string };
+      return {
+        id: t.id,
+        trxId: t.providerTransactionId,
+        sender: payload.senderNumber ?? null,
+        receiver: payload.receiverNumber ?? null,
+        amount: t.amount,
+        status: t.status,
+        failureReason: t.failureReason,
+        createdAt: t.createdAt,
+      };
+    });
 
   return (
     <div className="space-y-6">
@@ -57,7 +73,24 @@ async function Detail({ params }: PageProps<"/admin/orders/[id]">) {
         </div>
       </div>
 
-      <OrderActions orderId={o.id} status={o.status} allowed={TRANSITIONS[o.status]} adminNote={o.adminNote ?? ""} phone={o.shippingPhone} />
+      {o.paymentMethod === "bkash" && (
+        <BkashPayment
+          orderId={o.id}
+          orderClosed={o.status === "cancelled" || o.status === "rejected"}
+          paymentStatus={o.paymentStatus}
+          charges={bkashCharges}
+        />
+      )}
+
+      <OrderActions
+        orderId={o.id}
+        status={o.status}
+        allowed={TRANSITIONS[o.status]}
+        adminNote={o.adminNote ?? ""}
+        phone={o.shippingPhone}
+        paymentMethod={o.paymentMethod}
+        awaitingPayment={o.paymentMethod === "bkash" && o.paymentStatus !== "paid"}
+      />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-6">
@@ -108,7 +141,8 @@ async function Detail({ params }: PageProps<"/admin/orders/[id]">) {
               {o.events.map((e) => (
                 <li key={e.id} className="relative text-sm">
                   <span className="absolute -left-[25px] top-1.5 h-2 w-2 rounded-full bg-espresso" />
-                  <p className="font-medium">{ORDER_LABEL[e.toStatus]}</p>
+                  {/* Same status on both sides means a payment event, not a status change. */}
+                  <p className="font-medium">{e.fromStatus === e.toStatus ? "Payment update" : ORDER_LABEL[e.toStatus]}</p>
                   <p className="text-xs text-chocolate">
                     {formatDateTime(e.createdAt)}
                     {e.actor && ` · by ${e.actor.name}${e.actor.role === "admin" ? " (admin)" : ""}`}

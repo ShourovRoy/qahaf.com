@@ -1,6 +1,7 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db";
+import type { BkashAccountType } from "@/lib/bkash";
 
 export type StoreSettings = {
   shippingInsideDhaka: number;
@@ -13,6 +14,8 @@ export type StoreSettings = {
   // Private: new-order and low-stock alerts. Falls back to contactEmail, then SMTP_EMAIL.
   notifyEmail: string;
   storeAddress: string;
+  // Manual bKash payments. Shown at checkout only when enabled with a number.
+  bkash: { enabled: boolean; number: string; accountType: BkashAccountType };
   socials: { facebook: string; instagram: string; tiktok: string };
   hero: {
     kicker: string;
@@ -42,6 +45,7 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   contactEmail: "",
   notifyEmail: "",
   storeAddress: "Dhaka, Bangladesh",
+  bkash: { enabled: false, number: "", accountType: "personal" },
   socials: { facebook: "", instagram: "", tiktok: "" },
   hero: {
     kicker: "New Season",
@@ -73,6 +77,7 @@ export async function getSettings(): Promise<StoreSettings> {
   return {
     ...DEFAULT_SETTINGS,
     ...saved,
+    bkash: { ...DEFAULT_SETTINGS.bkash, ...saved.bkash },
     socials: { ...DEFAULT_SETTINGS.socials, ...saved.socials },
     hero: { ...DEFAULT_SETTINGS.hero, ...saved.hero },
   };
@@ -81,4 +86,8 @@ export async function getSettings(): Promise<StoreSettings> {
 export function shippingFeeFor(settings: StoreSettings, district: string, subtotal: number) {
   if (settings.freeShippingThreshold > 0 && subtotal >= settings.freeShippingThreshold) return 0;
   return district === "Dhaka" ? settings.shippingInsideDhaka : settings.shippingOutsideDhaka;
+}
+
+export function bkashAvailable(settings: StoreSettings) {
+  return settings.bkash.enabled && !!settings.bkash.number;
 }

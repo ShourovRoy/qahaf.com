@@ -5,6 +5,7 @@ import { refresh, updateTag } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
 import { product, review, session, setting, user } from "@/db/schema";
+import { normalizeBdPhone } from "@/lib/phone";
 import { deleteObjects } from "@/lib/r2";
 import { assertAdmin } from "@/lib/session";
 import { getSettings } from "@/server/settings";
@@ -79,6 +80,25 @@ const settingsSchema = z.object({
   contactEmail: z.union([z.literal(""), z.string().email()]),
   notifyEmail: z.union([z.literal(""), z.string().trim().email()]),
   storeAddress: text(200),
+  bkash: z
+    .object({
+      enabled: z.boolean(),
+      // Stored as 01XXXXXXXXX, the way customers type it into the bKash app.
+      number: z
+        .string()
+        .trim()
+        .transform((v, ctx) => {
+          if (!v) return "";
+          const phone = normalizeBdPhone(v);
+          if (!phone) {
+            ctx.addIssue({ code: "custom", message: "Enter a valid bKash mobile number." });
+            return z.NEVER;
+          }
+          return phone.replace(/^\+88/, "");
+        }),
+      accountType: z.enum(["personal", "agent", "merchant"]),
+    })
+    .refine((b) => !b.enabled || b.number, { path: ["number"], message: "Add the bKash number before turning bKash on." }),
   socials: z.object({ facebook: text(200), instagram: text(200), tiktok: text(200) }),
   hero: z.object({
     kicker: text(40),

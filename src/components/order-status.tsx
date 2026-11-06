@@ -41,7 +41,7 @@ export function PaymentStatusBadge({ status }: { status: PayStatus }) {
   return <Badge tone={tone[status]}>{status.replace("_", " ")}</Badge>;
 }
 
-export const PROVIDER_LABEL = { cod: "Cash on delivery", sslcommerz: "SSLCommerz", paystation: "PayStation" } as const;
+export const PROVIDER_LABEL = { cod: "Cash on delivery", bkash: "bKash", sslcommerz: "SSLCommerz", paystation: "PayStation" } as const;
 
 const STEPS: OrderStatus[] = ["pending", "confirmed", "processing", "shipped", "delivered"];
 

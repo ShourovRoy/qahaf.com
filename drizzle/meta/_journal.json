@@ -15,6 +15,13 @@
       "when": 1793993012140,
       "tag": "0001_custom_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793994748146,
+      "tag": "0002_bkash_payments",
+      "breakpoints": true
     }
   ]
 }

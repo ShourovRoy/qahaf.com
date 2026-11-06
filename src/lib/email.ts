@@ -65,15 +65,33 @@ export const emails = {
       url,
     }),
   }),
-  orderPlaced: (name: string, orderNumber: string, total: string, url: string) => ({
+  orderPlaced: (name: string, orderNumber: string, total: string, method: "cod" | "bkash", url: string) => ({
     subject: `Order ${orderNumber} received`,
     html: layout(
       "Thank you for your order",
-      p(`Hi ${name}, we've received order ${orderNumber} (${total}, cash on delivery).`) +
-        p("Our team will verify it shortly and let you know once it's confirmed."),
+      p(`Hi ${name}, we've received order ${orderNumber} (${total}, ${method === "bkash" ? "paid by bKash" : "cash on delivery"}).`) +
+        p(
+          method === "bkash"
+            ? "We'll check your bKash payment and let you know once your order is confirmed."
+            : "Our team will verify it shortly and let you know once it's confirmed.",
+        ),
       { label: "View order", url },
     ),
   }),
+  bkashPayment: (name: string, orderNumber: string, action: "verify" | "reject" | "refund", url: string, reason?: string | null) => {
+    const copy = {
+      verify: ["bKash payment received", `Hi ${name}, we've received your bKash payment for order ${orderNumber}.`],
+      reject: [
+        "We couldn't find your bKash payment",
+        `Hi ${name}, we couldn't match the bKash transaction for order ${orderNumber}. You can enter the correct TrxID on your order page.`,
+      ],
+      refund: ["bKash payment refunded", `Hi ${name}, we've refunded your bKash payment for order ${orderNumber}.`],
+    }[action];
+    return {
+      subject: `Order ${orderNumber}: ${copy[0]}`,
+      html: layout(copy[0], p(copy[1]) + (reason ? p(`Note: ${reason}`) : ""), { label: "View order", url }),
+    };
+  },
   orderStatus: (name: string, orderNumber: string, status: string, url: string, reason?: string | null) => ({
     subject: `Order ${orderNumber} is ${status}`,
     html: layout(
@@ -82,9 +100,14 @@ export const emails = {
       { label: "View order", url },
     ),
   }),
-  adminNewOrder: (orderNumber: string, total: string, url: string) => ({
+  adminNewOrder: (orderNumber: string, total: string, method: "cod" | "bkash", url: string) => ({
     subject: `New order ${orderNumber} awaiting verification`,
-    html: layout("New order", p(`Order ${orderNumber} (${total}) needs verification.`), { label: "Review order", url }),
+    html: layout(
+      "New order",
+      p(`Order ${orderNumber} (${total}, ${method === "bkash" ? "bKash" : "cash on delivery"}) needs verification.`) +
+        (method === "bkash" ? p("Check the bKash TrxID in your bKash account before confirming.") : ""),
+      { label: "Review order", url },
+    ),
   }),
   adminLowStock: (lines: string[], url: string) => ({
     subject: "Low stock alert",

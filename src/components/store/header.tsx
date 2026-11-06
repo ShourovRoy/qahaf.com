@@ -5,7 +5,7 @@ import { getCart } from "@/server/cart";
 import { getNavCategories } from "@/server/catalog";
 import { getSettings } from "@/server/settings";
 import { getUser } from "@/lib/session";
-import { MobileMenu } from "./mobile-menu";
+import { MobileMenu, MobileSearch } from "./mobile-menu";
 
 export async function Header() {
   const [categories, settings] = await Promise.all([getNavCategories(), getSettings()]);
@@ -46,9 +46,9 @@ export async function Header() {
               className="h-10 w-44 rounded-sm border border-chocolate/25 bg-ivory pl-9 pr-3 text-sm placeholder:text-chocolate/50 focus:border-espresso focus:outline-none lg:w-56"
             />
           </form>
-          <Link href="/shop" className="p-2 text-espresso md:hidden" aria-label="Search">
-            <Search size={20} strokeWidth={1.5} />
-          </Link>
+          <Suspense fallback={<span className="h-9 w-9 md:hidden" />}>
+            <MobileSearch />
+          </Suspense>
           <Suspense fallback={<HeaderIcons />}>
             <HeaderUserIcons />
           </Suspense>

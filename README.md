@@ -1,6 +1,6 @@
 # QAHAF
 
-Online menswear store for Bangladesh, built with Next.js, PostgreSQL and Cloudflare R2. Customers pay by cash on delivery.
+Online menswear store for Bangladesh, built with Next.js, PostgreSQL and Cloudflare R2. Customers pay by cash on delivery or by bKash (manual Send Money, checked by an admin).
 
 ## Features
 
@@ -70,6 +70,12 @@ Browsers upload media straight to the bucket, so it needs a CORS rule. Use the R
 | `bun run db:migrate` | Apply migrations |
 | `bun run db:studio` | Browse the database |
 | `bun run make-admin <email>` | Grant admin access |
+
+## bKash payments
+
+Turn bKash on in **Admin → Settings → bKash payments** and enter the store's bKash number and account type. At checkout the customer sends the order total to that number, then enters the TrxID and the number they paid from.
+
+The order arrives with payment status `pending`. On the order page in the admin panel, look the TrxID up in your bKash account, then press **Payment received** or **Not received**. A bKash order can only be confirmed after its payment is verified. If a payment is marked not received, the customer can send a corrected TrxID from their order page. If a paid order is cancelled or rejected, send the money back in bKash and press **Record refund**. Each TrxID can be used for one order only.
 
 ## Adding an online payment gateway later
 

@@ -28,6 +28,15 @@ export const addressSchema = z
 
 export type AddressInput = z.infer<typeof addressSchema>;
 
+// bKash TrxIDs are 10 letters and digits, e.g. 9A7B6C5D4E. Spaces and case are forgiven.
+export const bkashSchema = z.object({
+  bkashTrxId: z
+    .string()
+    .transform((v) => v.replace(/\s/g, "").toUpperCase())
+    .pipe(z.string().regex(/^[A-Z0-9]{8,12}$/, "Enter the TrxID from your bKash message, e.g. 9A7B6C5D4E.")),
+  bkashSender: bdPhone,
+});
+
 export type FieldErrors = Record<string, string[] | undefined>;
 export type FormState = { error?: string; success?: string; fieldErrors?: FieldErrors } | null;
 

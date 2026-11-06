@@ -249,7 +249,8 @@ export const orderStatus = pgEnum("order_status", [
 ]);
 
 // New gateways only need a new enum value; order and payment shapes stay the same.
-export const paymentProvider = pgEnum("payment_provider", ["cod", "sslcommerz", "paystation"]);
+// bkash is a manual Send Money payment: the customer gives a TrxID and an admin checks it.
+export const paymentProvider = pgEnum("payment_provider", ["cod", "bkash", "sslcommerz", "paystation"]);
 
 export const paymentStatus = pgEnum("payment_status", [
   "unpaid",
@@ -359,7 +360,7 @@ export const transaction = pgTable(
     status: transactionStatus().default("pending").notNull(),
     amount: integer().notNull(),
     currency: text().default("BDT").notNull(),
-    // Gateway ids (e.g. SSLCommerz tran_id / val_id), null for COD.
+    // Gateway ids (e.g. SSLCommerz tran_id / val_id, bKash TrxID), null for COD.
     providerTransactionId: text(),
     providerSessionId: text(),
     providerPayload: jsonb(),

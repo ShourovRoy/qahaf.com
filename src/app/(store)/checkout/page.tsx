@@ -11,14 +11,15 @@ import { formatPrice } from "@/lib/format";
 import { mediaUrl } from "@/lib/media";
 import { requireUser } from "@/lib/session";
 import { getCart } from "@/server/cart";
-import { getSettings } from "@/server/settings";
+import { BKASH_ACCOUNT } from "@/lib/bkash";
+import { bkashAvailable, getSettings } from "@/server/settings";
 
 export const metadata: Metadata = { title: "Checkout", robots: { index: false } };
 
 export default function CheckoutPage() {
   return (
     <div className="container-page py-10">
-      <PageHeading title="Checkout" eyebrow="Cash on delivery" />
+      <PageHeading title="Checkout" eyebrow="Delivery & payment" />
       <Suspense fallback={<Skeleton className="h-96" />}>
         <CheckoutContent />
       </Suspense>
@@ -43,6 +44,7 @@ async function CheckoutContent() {
         defaults={{ fullName: user.name, phone: user.phone ?? "" }}
         subtotal={cart.subtotal}
         shipping={{ inside: settings.shippingInsideDhaka, outside: settings.shippingOutsideDhaka, freeOver: settings.freeShippingThreshold }}
+        bkash={bkashAvailable(settings) ? { number: settings.bkash.number, menu: BKASH_ACCOUNT[settings.bkash.accountType].menu } : null}
       />
       <aside className="h-fit rounded-sm bg-surface p-6 lg:sticky lg:top-28">
         <h2 className="eyebrow mb-4">Your bag ({cart.count})</h2>

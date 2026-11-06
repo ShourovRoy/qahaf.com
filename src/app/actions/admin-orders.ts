@@ -6,7 +6,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { order } from "@/db/schema";
 import { assertAdmin } from "@/lib/session";
-import { transitionOrder } from "@/server/orders";
+import { settleBkashPayment, transitionOrder } from "@/server/orders";
 
 const schema = z.object({
   orderId: z.string().uuid(),
@@ -39,4 +39,24 @@ export async function saveAdminNote(orderId: string, note: string) {
   await db.update(order).set({ adminNote: note.slice(0, 2000) || null }).where(eq(order.id, orderId));
   refresh();
   return { ok: true as const };
+}
+
+const bkashSchema = z.object({
+  orderId: z.string().uuid(),
+  action: z.enum(["verify", "reject", "refund"]),
+  note: z.string().trim().max(500).optional(),
+  refundTrxId: z.string().trim().toUpperCase().max(20).optional(),
+});
+
+export async function settleBkash(input: z.infer<typeof bkashSchema>) {
+  const admin = await assertAdmin();
+  const parsed = bkashSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: "Invalid request." };
+  try {
+    await settleBkashPayment({ ...parsed.data, actorId: admin.id });
+    refresh();
+    return { ok: true as const };
+  } catch (err) {
+    return { ok: false as const, error: err instanceof Error ? err.message : "Update failed." };
+  }
 }

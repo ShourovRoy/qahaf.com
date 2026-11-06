@@ -1,0 +1,1 @@
+ALTER TYPE "public"."payment_provider" ADD VALUE 'bkash' BEFORE 'sslcommerz';

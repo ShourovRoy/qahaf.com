@@ -5,7 +5,8 @@ import { saveSettings } from "@/app/actions/admin-misc";
 import { MediaUploader, type UploadedMedia } from "@/components/media-uploader";
 import { toast } from "@/components/toaster";
 import { Button } from "@/components/ui/button";
-import { Field, Input, Textarea } from "@/components/ui/form";
+import { Field, Input, Select, Textarea } from "@/components/ui/form";
+import { BKASH_ACCOUNT, type BkashAccountType } from "@/lib/bkash";
 import { mediaUrl } from "@/lib/media";
 import type { StoreSettings } from "@/server/settings";
 
@@ -43,6 +44,45 @@ export function SettingsForm({ initial }: { initial: StoreSettings }) {
           </Field>
           <Field label="Free delivery over (৳)" htmlFor="s-free" hint="0 turns this off">
             <Input id="s-free" inputMode="numeric" value={s.freeShippingThreshold} onChange={(e) => setS({ ...s, freeShippingThreshold: num(e.target.value) })} />
+          </Field>
+        </div>
+      </Card>
+
+      <Card title="bKash payments">
+        <label className="flex items-start gap-3 text-sm">
+          <input
+            type="checkbox"
+            className="mt-0.5 h-4 w-4 accent-espresso"
+            checked={s.bkash.enabled}
+            onChange={(e) => setS({ ...s, bkash: { ...s.bkash, enabled: e.target.checked } })}
+          />
+          <span>
+            <span className="font-medium text-espresso">Accept bKash at checkout</span>
+            <span className="block text-xs text-chocolate">
+              Customers send money to this number and enter the TrxID. You check it in your bKash account, then verify it on the order page.
+            </span>
+          </span>
+        </label>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <Field label="bKash number" htmlFor="bk-number" hint="Shown to customers at checkout">
+            <Input
+              id="bk-number"
+              inputMode="tel"
+              placeholder="01XXXXXXXXX"
+              value={s.bkash.number}
+              onChange={(e) => setS({ ...s, bkash: { ...s.bkash, number: e.target.value } })}
+            />
+          </Field>
+          <Field label="Account type" htmlFor="bk-type" hint={`Customers will use “${BKASH_ACCOUNT[s.bkash.accountType].menu}” in the bKash app`}>
+            <Select
+              id="bk-type"
+              value={s.bkash.accountType}
+              onChange={(e) => setS({ ...s, bkash: { ...s.bkash, accountType: e.target.value as BkashAccountType } })}
+            >
+              {Object.entries(BKASH_ACCOUNT).map(([value, a]) => (
+                <option key={value} value={value}>{a.label}</option>
+              ))}
+            </Select>
           </Field>
         </div>
       </Card>

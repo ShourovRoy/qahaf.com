@@ -18,7 +18,24 @@ const ACTION: Partial<Record<Status, { label: string; variant: ButtonStyle["vari
   cancelled: { label: "Cancel order", variant: "ghost", needsReason: true },
 };
 
-export function OrderActions({ orderId, status, allowed, adminNote, phone }: { orderId: string; status: Status; allowed: Status[]; adminNote: string; phone: string }) {
+export function OrderActions({
+  orderId,
+  status,
+  allowed,
+  adminNote,
+  phone,
+  paymentMethod,
+  awaitingPayment,
+}: {
+  orderId: string;
+  status: Status;
+  allowed: Status[];
+  adminNote: string;
+  phone: string;
+  paymentMethod: string;
+  // A bKash order can't be confirmed until its payment is verified.
+  awaitingPayment: boolean;
+}) {
   const [pending, start] = useTransition();
   const [reasonFor, setReasonFor] = useState<Status | null>(null);
   const [reason, setReason] = useState("");
@@ -36,6 +53,9 @@ export function OrderActions({ orderId, status, allowed, adminNote, phone }: { o
 
   return (
     <section className="rounded-sm border border-chocolate/15 bg-surface p-5">
+      {status === "pending" && awaitingPayment && (
+        <p className="mb-2 text-sm text-chocolate">Verify the bKash payment above before confirming this order.</p>
+      )}
       {status === "pending" && (
         <p className="mb-4 flex items-center gap-2 text-sm text-chocolate">
           <Phone size={14} /> Call the customer at <a href={`tel:${phone}`} className="font-medium text-espresso underline underline-offset-4">{phone.replace(/^\+88/, "")}</a> to verify before confirming.
@@ -46,9 +66,16 @@ export function OrderActions({ orderId, status, allowed, adminNote, phone }: { o
           {allowed.map((to) => {
             const a = ACTION[to];
             if (!a) return null;
+            const label = to === "delivered" && paymentMethod !== "cod" ? "Mark delivered" : a.label;
             return (
-              <Button key={to} variant={a.variant} size="sm" disabled={pending} onClick={() => (a.needsReason ? setReasonFor(to) : run(to))}>
-                {a.label}
+              <Button
+                key={to}
+                variant={a.variant}
+                size="sm"
+                disabled={pending || (to === "confirmed" && awaitingPayment)}
+                onClick={() => (a.needsReason ? setReasonFor(to) : run(to))}
+              >
+                {label}
               </Button>
             );
           })}
