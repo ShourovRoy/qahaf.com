@@ -55,7 +55,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Toaster />
         <DeveloperSignature />
         {/* Developer promo popup, hosted on the Roybrains CDN. */}
-        <Script
+        {/* <Script
           src="https://d2dxk61kqibovk.cloudfront.net/peomotion-scripts/roybrains-promo.js"
           strategy="afterInteractive"
           data-roybrains-promo=""
@@ -63,7 +63,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           data-fg="#F9F7F2"
           data-accent="#C4A482"
           data-font="var(--font-jost), sans-serif"
-        />
+        /> */}
       </body>
     </html>
   );

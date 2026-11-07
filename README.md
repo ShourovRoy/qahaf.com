@@ -105,6 +105,10 @@ Orders already record `paymentMethod` and `paymentStatus`, and every money movem
 2. Redirect the customer to the gateway.
 3. Mark the transaction `succeeded` or `failed` from the gateway's IPN/validation callback.
 
+## License
+
+Proprietary. Copyright © 2026 [Roybrains](https://roybrains.com), Shourov Roy. All rights reserved. This repository may not be used, copied, modified or deployed without written permission from Roybrains. See [LICENSE](LICENSE).
+
 ## Credits
 
 Designed and built by [Roybrains](https://roybrains.com).

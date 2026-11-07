@@ -31,13 +31,16 @@ export function SalesChart({ days }: { days: Day[] }) {
         <span>Peak {formatPrice(max)}</span>
         <span>{label(days[days.length - 1].day)}</span>
       </div>
-      <table className="sr-only">
-        <caption>Daily sales, last 30 days</caption>
-        <thead><tr><th>Date</th><th>Sales</th><th>Orders</th></tr></thead>
-        <tbody>
-          {days.map((d) => <tr key={d.day}><td>{d.day}</td><td>{formatPrice(d.total)}</td><td>{d.orders}</td></tr>)}
-        </tbody>
-      </table>
+      {/* Tables ignore sr-only's 1px size and would stretch the page, so a div does the hiding. */}
+      <div className="sr-only">
+        <table>
+          <caption>Daily sales, last 30 days</caption>
+          <thead><tr><th>Date</th><th>Sales</th><th>Orders</th></tr></thead>
+          <tbody>
+            {days.map((d) => <tr key={d.day}><td>{d.day}</td><td>{formatPrice(d.total)}</td><td>{d.orders}</td></tr>)}
+          </tbody>
+        </table>
+      </div>
     </figure>
   );
 }
