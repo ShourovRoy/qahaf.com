@@ -108,3 +108,27 @@ Orders already record `paymentMethod` and `paymentStatus`, and every money movem
 ## Credits
 
 Designed and built by [Roybrains](https://roybrains.com).
+
+### Roybrains promo popup
+
+`public/roybrains-promo.js` shows a large, centred popup promoting Roybrains: a brand panel, headline, short pitch, three highlight points and a call-to-action button. It has no dependencies and renders inside a Shadow DOM, so it works on any website without clashing with the site's styles. It appears 2.5 seconds after the page opens, shows at most once every 7 days per visitor, and closes with the × button, "Maybe later", a click outside it, or Esc. While it is open the page behind is blurred and does not scroll, and keyboard focus stays inside it.
+
+To use it on another site, copy the file there (or host it once and point every site at it) and add:
+
+```html
+<script src="https://your-host/roybrains-promo.js" async data-roybrains-promo
+  data-exclude="/checkout,/admin"
+  data-bg="#16181d" data-fg="#f5f6f8" data-accent="#7aa2ff"></script>
+```
+
+| Attribute | Default | Purpose |
+| --- | --- | --- |
+| `data-delay` | `2.5` | Seconds after the page opens before the popup appears |
+| `data-every` | `7` | Days before the same visitor sees it again |
+| `data-exclude` | none | Comma-separated path prefixes where it never shows |
+| `data-bg`, `data-fg`, `data-accent` | dark theme | Popup colours, to match the host site. The accent fills the brand panel and button. |
+| `data-font` | system font | Font family |
+| `data-title`, `data-text`, `data-cta` | Roybrains copy | Popup wording |
+| `data-points` | three default points | Highlight points, separated by `\|` |
+
+Links carry `utm_source=<site hostname>`, so roybrains.com analytics show which site sent each visitor. The hosted copy is at `https://d2dxk61kqibovk.cloudfront.net/peomotion-scripts/roybrains-promo.js`. This store loads it from there in `src/app/layout.tsx` with QAHAF colours. `public/roybrains-promo.js` is the source; upload it again after editing. To test, run `RoybrainsPromo.reset()` then `RoybrainsPromo.show()` in the browser console.
